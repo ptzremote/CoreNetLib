@@ -1,7 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+<!--Pack in nuget command "msbuild /t:pack /p:Configuration=Release"-->
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+  <PackageId>CoreNetLib</PackageId>
+    <PackageVersion>1.0.1</PackageVersion>
+    <Authors>Leohim</Authors>
+    <Description>Net Standard 2.0 library for client-server data exchange based on tcp protocol.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>First release for NET Standard</PackageReleaseNotes>
+    <Copyright>Leohim</Copyright>
+    <PackageTags>tcpserver tcpclient</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\CoreNetLib.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
