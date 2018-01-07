@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CoreNetLib
 {
-    public class DataCollector
+    internal class MessageHub
     {
         internal const int BUFFER_SIZE = 65536;
         IClientInfoStorage clientInfoStorage;
@@ -16,21 +16,21 @@ namespace CoreNetLib
         public event EventHandler<EventArgs> OnMessageReceived;
         public event EventHandler<string> OnEvent;
 
-        public DataCollector()
+        public MessageHub()
         {
             clientInfoStorage = new TcpClientInfoStorage();
         }
 
-        internal DataCollector(IClientInfoStorage cis)
+        internal MessageHub(IClientInfoStorage cis)
         {
             clientInfoStorage = cis;
         }
-        public List<TcpClientInfo> GetClientList()
+        internal List<TcpClientInfo> GetClientList()
         {
             return new List<TcpClientInfo>(clientInfoStorage);
         }
         
-        public void WriteToAllStream(byte[] message)
+        internal void SendMessageToAll(byte[] message)
         {
             var clientList = 
                 new ReadOnlyCollection<TcpClientInfo>((clientInfoStorage as TcpClientInfoStorage)
@@ -55,7 +55,7 @@ namespace CoreNetLib
             }
         }
 
-        public async void ReceiveBytesFromTcpClientAsync(TcpClient tcpClient)
+        internal async void ReceiveBytesFromTcpClientAsync(TcpClient tcpClient)
         {
             var clientInfo = new TcpClientInfo(tcpClient);
             clientInfoStorage.StoreInfo(clientInfo);
@@ -96,7 +96,7 @@ namespace CoreNetLib
                 OnEvent?.Invoke(null, $"Curent client count: {clientInfoStorage.Count()}");
             }
         }
-        public List<byte[]> GetMessageList()
+        internal List<byte[]> GetMessageList()
         {
             List<byte[]> messageList = new List<byte[]>();
             foreach (var client in GetClientList().Where(c => c.ReceivedMessage.Count > 0))

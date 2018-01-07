@@ -10,7 +10,6 @@ namespace CoreNetLib
         {
             MemoryStream stream = new MemoryStream();
             formatter.Serialize(stream, data);
-
             return stream.ToArray();
         }
         internal static object Deserialize(byte[] bytes)

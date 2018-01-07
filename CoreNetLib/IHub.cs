@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreNetLib.ServerNetLib
+namespace CoreNetLib
 {
     public interface IHub
     {

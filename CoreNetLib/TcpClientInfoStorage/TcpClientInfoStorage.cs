@@ -11,10 +11,6 @@ namespace CoreNetLib
     {
         List<TcpClientInfo> clientInfos;
 
-        public TcpClientInfo this[int i]
-        {
-            get { return clientInfos[i]; }
-        }
         public TcpClientInfoStorage()
         {
             clientInfos = new List<TcpClientInfo>();

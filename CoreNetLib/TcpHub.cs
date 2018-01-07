@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace CoreNetLib.ServerNetLib
+namespace CoreNetLib
 {
     public class TcpHub : IHub
     {
@@ -12,14 +12,17 @@ namespace CoreNetLib.ServerNetLib
 
         TcpListener listener;
         const int defaultPort = 11000;
-        internal DataCollector dataCollector;
+        internal MessageHub messageHub;
         NetSettings netSettings;
 
         public TcpHub(int port = defaultPort)
         {
-            dataCollector = new DataCollector();
-            dataCollector.OnEvent += DataCollector_OnEvent;
-            dataCollector.OnMessageReceived += DataCollector_OnMessageReceived;
+            if (netSettings == null)
+                netSettings = new NetSettings();
+
+            messageHub = new MessageHub();
+            messageHub.OnEvent += DataCollector_OnEvent;
+            messageHub.OnMessageReceived += DataCollector_OnMessageReceived;
             try
             {
                 listener = new TcpListener(IPAddress.Any, port);
@@ -43,22 +46,22 @@ namespace CoreNetLib.ServerNetLib
 
         private void DataCollector_OnMessageReceived(object sender, EventArgs e)
         {
-            foreach (var message in dataCollector.GetMessageList())
+            foreach (var message in messageHub.GetMessageList())
             {
                 OnDataReceived?.Invoke(this, new ReceivedDataEventArgs { Data = netSettings.deserializer.Invoke(message) });
             }
         }
 
-        void IHub.Start()
+        public void Start()
         {
             listener.Start();
 
             AcceptManyTcpClientAsync();
         }
 
-        void IHub.SendToAll(object message)
+        public void SendToAll(object message)
         {
-            dataCollector.WriteToAllStream(netSettings.serializer(message));
+            messageHub.SendMessageToAll(netSettings.serializer(message));
         }
 
         async void AcceptManyTcpClientAsync()
@@ -69,7 +72,7 @@ namespace CoreNetLib.ServerNetLib
                 var tcpClient = await listener.AcceptTcpClientAsync();
 
                 new Task(() =>
-                dataCollector.ReceiveBytesFromTcpClientAsync(tcpClient))
+                messageHub.ReceiveBytesFromTcpClientAsync(tcpClient))
                 .Start();
             }
         }

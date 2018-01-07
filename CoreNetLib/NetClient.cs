@@ -2,13 +2,13 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace CoreNetLib.NetClientLib
+namespace CoreNetLib
 {
     public class NetClient
     {
         TcpClient tcpClient;
         NetworkStream stream;
-        DataCollector dataCollector;
+        MessageHub messageHub;
         NetSettings netSettings;
 
         public event EventHandler<string> OnEvent;
@@ -30,9 +30,9 @@ namespace CoreNetLib.NetClientLib
         {
             this.netSettings = netSettings;
             tcpClient = new TcpClient();
-            dataCollector = new DataCollector();
-            dataCollector.OnEvent += DataCollector_OnEvent;
-            dataCollector.OnMessageReceived += DataCollector_OnMessageReceived;
+            messageHub = new MessageHub();
+            messageHub.OnEvent += DataCollector_OnEvent;
+            messageHub.OnMessageReceived += DataCollector_OnMessageReceived;
         }
 
         private void DataCollector_OnEvent(object sender, string e)
@@ -42,7 +42,7 @@ namespace CoreNetLib.NetClientLib
 
         private void DataCollector_OnMessageReceived(object sender, EventArgs e)
         {
-            foreach (var message in dataCollector.GetMessageList())
+            foreach (var message in messageHub.GetMessageList())
             {
                 OnDataReceived?.Invoke(this,
                 new ReceivedDataEventArgs { Data = netSettings.deserializer.Invoke(message) });
@@ -63,7 +63,7 @@ namespace CoreNetLib.NetClientLib
             stream = tcpClient.GetStream();
 
             new Task(() =>
-            dataCollector.ReceiveBytesFromTcpClientAsync(tcpClient))
+            messageHub.ReceiveBytesFromTcpClientAsync(tcpClient))
             .Start();
         }
         public void Disconnect()

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CoreNetLib.NetClientLib
+namespace CoreNetLib
 {
     public class DisconnectEventArgs : EventArgs
     {
