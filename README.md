@@ -4,3 +4,6 @@ It is done for training purposes.
 
 # Packages
 You can install it from [NuGet](https://www.nuget.org/packages/CoreNetLib/) or building from source.
+
+# Getting Started
+See first sample in [Wiki](https://github.com/ptzremoute/CoreNetLib/wiki) section.
