@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,7 +15,9 @@ namespace CoreNetLib
         IClientInfoStorage clientInfoStorage;
 
         public event EventHandler<EventArgs> OnMessageReceived;
-        public event EventHandler<string> OnEvent;
+        //public event EventHandler<string> OnEvent;
+
+        ILogger Logger { get; } = CoreNetLogging.CreateLogger<MessageHub>();
 
         public MessageHub()
         {
@@ -45,11 +48,11 @@ namespace CoreNetLib
                     var bytes = PacketProtocol.WrapMessage(message);
                     clientInfo.Stream.WriteAsync(bytes, 0, bytes.Length);
 
-                    OnEvent?.Invoke(null, $"{bytes.Length } bytes sent to {clientInfo.ClientId}.");
+                    Logger.LogDebug($"{bytes.Length } bytes sent to {clientInfo.ClientId}.");
                 }
                 catch (Exception ex)
                 {
-                    OnEvent?.Invoke(null, ex.Message);
+                    Logger.LogError(ex.Message);
                     clientInfoStorage.RemoveInfo(clientInfo);
                 }
             }
@@ -60,9 +63,10 @@ namespace CoreNetLib
             var clientInfo = new TcpClientInfo(tcpClient);
             clientInfoStorage.StoreInfo(clientInfo);
 
-            OnEvent?.Invoke(null, $"New connection accepted. Id: {clientInfo.ClientId}, " +
+            Logger.LogInformation($"New connection accepted. Id: {clientInfo.ClientId}, " +
                 $"Endpoint: {clientInfo.TcpClient.Client.RemoteEndPoint}");
-            OnEvent?.Invoke(null, $"Curent client count: {clientInfoStorage.Count()}");
+
+            Logger.LogInformation($"Curent client count: {clientInfoStorage.Count()}");
 
             PacketProtocol pp = new PacketProtocol(500000)
             {
@@ -83,17 +87,17 @@ namespace CoreNetLib
             }
             catch (ClientDisconnectedException)
             {
-                OnEvent?.Invoke(null, $"Client {clientInfo.ClientId} disconnected.");
+                Logger.LogDebug($"Client {clientInfo.ClientId} disconnected.");
             }
             catch (Exception ex)
             {
-                OnEvent?.Invoke(null, ex.Message);
+                Logger.LogError(ex.Message);
             }
             finally
             {
                 clientInfoStorage.RemoveInfo(clientInfo);
 
-                OnEvent?.Invoke(null, $"Curent client count: {clientInfoStorage.Count()}");
+                Logger.LogDebug($"Curent client count: {clientInfoStorage.Count()}");
             }
         }
         internal List<byte[]> GetMessageList()

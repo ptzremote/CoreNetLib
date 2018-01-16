@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -8,12 +9,13 @@ namespace CoreNetLib
     public class TcpHub : IHub
     {
         public event EventHandler<ReceivedDataEventArgs> OnDataReceived;
-        public event EventHandler<string> OnEvent;
 
         TcpListener listener;
         const int defaultPort = 11000;
         internal MessageHub messageHub;
         NetSettings netSettings;
+
+        ILogger Logger { get; } = CoreNetLogging.CreateLogger<TcpHub>();
 
         public TcpHub(int port = defaultPort)
         {
@@ -21,7 +23,6 @@ namespace CoreNetLib
                 netSettings = new NetSettings();
 
             messageHub = new MessageHub();
-            messageHub.OnEvent += DataCollector_OnEvent;
             messageHub.OnMessageReceived += DataCollector_OnMessageReceived;
             try
             {
@@ -29,13 +30,8 @@ namespace CoreNetLib
             }
             catch (Exception ex)
             {
-                OnEvent?.Invoke(null, ex.Message);
+                Logger.LogError(ex.Message);
             }
-        }
-
-        private void DataCollector_OnEvent(object sender, string e)
-        {
-            OnEvent?.Invoke(sender, e);
         }
 
         public TcpHub(NetSettings netSettings)
@@ -68,7 +64,7 @@ namespace CoreNetLib
         {
             while (true)
             {
-                OnEvent?.Invoke(null, "Waiting for new connection...");
+                Logger.LogInformation("Waiting for new connection...");
                 var tcpClient = await listener.AcceptTcpClientAsync();
 
                 new Task(() =>

@@ -1,4 +1,6 @@
 ﻿using CoreNetLib;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SharedLib;
 using System;
 

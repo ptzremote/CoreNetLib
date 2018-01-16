@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -10,8 +11,8 @@ namespace CoreNetLib
         NetworkStream stream;
         MessageHub messageHub;
         NetSettings netSettings;
+        ILogger Logger { get; } = CoreNetLogging.CreateLogger<TcpHub>();
 
-        public event EventHandler<string> OnEvent;
         public event EventHandler<ReceivedDataEventArgs> OnDataReceived;
         public event EventHandler<DisconnectEventArgs> OnDisconnected;
 
@@ -31,13 +32,7 @@ namespace CoreNetLib
             this.netSettings = netSettings;
             tcpClient = new TcpClient();
             messageHub = new MessageHub();
-            messageHub.OnEvent += DataCollector_OnEvent;
             messageHub.OnMessageReceived += DataCollector_OnMessageReceived;
-        }
-
-        private void DataCollector_OnEvent(object sender, string e)
-        {
-            OnEvent?.Invoke(null, e);
         }
 
         private void DataCollector_OnMessageReceived(object sender, EventArgs e)
