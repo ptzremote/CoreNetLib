@@ -6,7 +6,7 @@ namespace CoreNetLib
     {
         public static ILoggerFactory LoggerFactory { get; } =
           new LoggerFactory();
-        internal static ILogger CreateLogger<T>() =>
+        public static ILogger CreateLogger<T>() =>
           LoggerFactory.CreateLogger<T>();
     }
 }
